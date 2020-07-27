@@ -12,7 +12,19 @@ const routes: Array<RouteConfig> = [
     {
         path: '/login',
         name: 'Login',
-        component: Login
+        component: Login,
+        beforeEnter: (to, from, next) => {
+            const info = localStorage.getItem('info');
+            if(!info) {
+                next();
+                return;
+            }
+            const token = JSON.parse(info).token;
+            if(token) {
+                next('/home');
+                return;
+            }
+        }
     },
     {
         path: '/home',
@@ -20,7 +32,19 @@ const routes: Array<RouteConfig> = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "home" */ '../views/Home.vue')
+        component: () => import(/* webpackChunkName: "home" */ '../views/Home.vue'),
+        beforeEnter: (to, from, next) => {
+            const info = localStorage.getItem('info');
+            if(!info) {
+                next('/login');
+                return;
+            }
+            next();
+        }
+    },
+    {
+        path: '*',
+        redirect: '/login'
     }
 ]
 
@@ -30,8 +54,4 @@ const router = new VueRouter({
     routes
 })
 
-router.beforeEach((to, from, next) => {
-    console.log('to::', to, 'from::', from);
-    next();
-})
 export default router
